@@ -7,7 +7,7 @@
 import inspect
 import sys
 import random
-
+from collections import deque
 
 def raiseNotDefined():
     fileName = inspect.stack()[1][1]
@@ -73,12 +73,11 @@ def random_search(problem):
     """
     start = problem.getStartState()
     node = [(start, "", 0)]   # class is better
-    frontier = [node]
-
-    explored = set()
+    frontier = [node]       #탐색할 경로 리스트
+    explored = set()        #방문한 상태 저장 집합
     while frontier:
         node = random.choice(frontier)
-        state = node[-1][0]
+        state = node[-1][0] 
         if problem.isGoalState(state):
             return [x[1] for x in node][1:]
 
@@ -98,16 +97,56 @@ def depth_first_search(problem):
     """Search the deepest nodes in the search tree first."""
 
     "*** YOUR CODE HERE ***"
-    raiseNotDefined()
+    stack = []  # DFS는 스택 사용
+    stack.append([(problem.getStartState(), "", 0)])  # (state, action, cost)
+    explored = set()
+    MAX_DEPTH = 50  # 탐색 깊이 제한 (조정 가능)
+
+    while stack:
+        node = stack.pop()
+        state = node[-1][0]  # 현재 상태
+
+        if problem.isGoalState(state):  # 목표 도달 시 경로 반환
+            return [x[1] for x in node][1:]
+
+        if state not in explored:
+            explored.add(state)
+
+            # 탐색 깊이 제한 추가
+            if len(node) <= MAX_DEPTH:
+                for successor in problem.getSuccessors(state):
+                    if successor[0] not in explored:
+                        new_path = node + [successor]  # 새로운 경로 생성
+                        stack.append(new_path)
+
+    return []  # 목표 상태를 찾지 못한 경우
+
 
 
 def breadth_first_search(problem):
     """Search the shallowest nodes in the search tree first."""
-
     "*** YOUR CODE HERE ***"
-    raiseNotDefined()
+    queue = deque()
+    queue.append([(problem.getStartState(), "", 0)])  # 초기 경로
+    explored = set()
 
+    while queue:
+        node = queue.popleft()
+        state = node[-1][0]  # 현재 상태
 
+        if problem.isGoalState(state):
+            return [x[1] for x in node][1:]  # 경로만 반환
+
+        if state not in explored:
+            explored.add(state)
+
+            for successor in problem.getSuccessors(state):
+                if successor[0] not in explored:
+                    new_path = node + [successor]
+                    queue.append(new_path)  # FIFO: 큐에 맨 뒤로 추가
+
+    return []
+    
 def uniform_cost_search(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
